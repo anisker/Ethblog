@@ -8,8 +8,9 @@ from ethblog.models import User, Post
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_mail import Message
 
-@app.route("/")
+
 @app.route("/home")
+@login_required
 def home():
 	page = request.args.get('page',1, type=int)
 	posts = Post.query.order_by(Post.date_posted.desc()).paginate(page = page, per_page=5)
@@ -34,6 +35,7 @@ def register():
 		return redirect(url_for('login'))
 	return render_template('register.html', title = 'Register', form=form)
 
+@app.route("/", methods=['GET','POST'])
 @app.route("/login", methods=['GET','POST'])
 def login():
 	if current_user.is_authenticated:
@@ -50,9 +52,10 @@ def login():
 	return render_template('login.html', title = 'Login', form=form)
 	
 @app.route("/logout")
+@login_required
 def logout():
 	logout_user()
-	return redirect(url_for('home'))
+	return redirect(url_for('login'))
 
 def save_picture(form_picture):
 	random_hex = secrets.token_hex(8)
@@ -83,7 +86,10 @@ def account():
 		form.username.data = current_user.username
 		form.email.data = current_user.email
 	image_file = url_for('static', filename= 'profile_pics/' + current_user.image_file)
-	return render_template('account.html', title = 'Account', image_file= image_file, form = form)
+	page = request.args.get('page',1, type=int)
+	user = User.query.filter_by(username=current_user.username).first_or_404()
+	posts = Post.query.filter_by(author=user).order_by(Post.date_posted.desc()).paginate(page = page, per_page=5)
+	return render_template('account.html', title = 'Account', image_file= image_file, form = form, posts= posts, user=user)
 
 @app.route("/post/new", methods=['GET','POST'])
 @login_required
@@ -98,6 +104,7 @@ def new_post():
 	return render_template('create_post.html', title = 'New Post', form = form, legend = 'New post')
 
 @app.route("/post/<int:post_id>")
+@login_required
 def post(post_id):
 	post = Post.query.get_or_404(post_id)
 	return render_template('post.html', title= post.title, post = post)
@@ -132,6 +139,7 @@ def delete_post(post_id):
 	return redirect(url_for('home'))
 
 @app.route("/user/<string:username>")
+@login_required
 def user_posts(username):
 	page = request.args.get('page',1, type=int)
 	user = User.query.filter_by(username=username).first_or_404()

@@ -17,17 +17,24 @@
 		<title>Ethblog</title>
 	{% endif %}
 </head>
-<body>
+<body class="jumbotron jumbotron-image " style="background-image: url(https://scet.berkeley.edu/wp-content/uploads/BCgraphicelement-3.png);background-size: cover;background-repeat: no-repeat;">
 	<header class="site-header">
   		<nav class="navbar navbar-expand-md navbar-light bg-white fixed-top" >
     		<div class="container">
-      			<a class="navbar-brand mr-4" href="/" style="color:#FF7F50;"><span class="bubble">ETHBlog</span></a>
+            {% if current_user.is_authenticated %}
+      			<a class="navbar-brand mr-4" href="/home" style="color:#FF7F50;"><span class="bubble">ETHBlog</span></a>
+            {% else %}
+            <a class="navbar-brand mr-4" style="color:#FF7F50;"><span class="bubble">ETHBlog</span></a>
+            {% endif %}
+
       			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
         			<span class="navbar-toggler-icon"></span>
       			</button>
       			<div class="collapse navbar-collapse" id="navbarToggle">
         			<div class="navbar-nav mr-auto">
-         				<a class="nav-item nav-link" href="{{ url_for('home') }}" style="color:#FFA07A; font-size:20px;"><i class="fas fa-home"></i> Home</a>
+                {% if current_user.is_authenticated %}
+                    <a class="nav-item nav-link" href="{{ url_for('home') }}" style="color:#FFA07A; font-size:20px;"><i class="fas fa-home"></i> Home</a>
+                {% endif %}
           			<a class="nav-item nav-link" href="{{ url_for('about') }}" style="color:#FFA07A;font-size:20px;"><i class="fas fa-info-circle"></i> About</a>
         			</div>
         			<!-- Navbar Right Side -->
@@ -47,7 +54,7 @@
 	</header>
 	<main role="main" class="container">
   		<div class="row" >
-    		<div class="col-md-12">
+    		<div class="col-md-12" >
     			{% with messages = get_flashed_messages(with_categories=true) %}
     				{% if messages %}
     					{% for category, message in messages %}
