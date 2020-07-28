@@ -16,8 +16,9 @@
 	{% else %}
 		<title>Ethblog</title>
 	{% endif %}
+
 </head>
-<body class="jumbotron jumbotron-image " style="background-image: url(https://scet.berkeley.edu/wp-content/uploads/BCgraphicelement-3.png);background-size: cover;background-repeat: no-repeat;">
+<body class="jumbotron jumbotron-image shadow" style="background-image: url(https://scet.berkeley.edu/wp-content/uploads/BCgraphicelement-3.png);background-size: cover;background-repeat: no-repeat;">
 	<header class="site-header">
   		<nav class="navbar navbar-expand-md navbar-light bg-white fixed-top" >
     		<div class="container">
@@ -40,12 +41,12 @@
         			<!-- Navbar Right Side -->
         			<div class="navbar-nav">
                   {% if current_user.is_authenticated %}
-                    <a class="nav-item nav-link" href="{{ url_for('new_post') }}" style="color:#FFA07A;font-size:20px;">New post</a>
+                    <a class="nav-item nav-link" href="{{ url_for('new_post') }}" style="color:#FFA07A;font-size:20px;"><i class="fa fa-plus"></i> New post</a>
                     <a class="nav-item nav-link" href="{{ url_for('account') }}" style="color:#FFA07A; font-size:20px;"><i class="fa fa-user-circle" ></i> My account</a>
                     <a class="nav-item nav-link" href="{{ url_for('logout') }}" style="color:#FFA07A; font-size:20px;"><i class="fas fa-sign-out-alt"></i> Logout</a>
                   {% else %}
           				  <a class="nav-item nav-link" href="{{ url_for('login') }}" style="color:#FFA07A; font-size:20px;"><i class="fas fa-sign-in-alt"></i> Login</a>
-          				  <a class="nav-item nav-link" href="{{ url_for('register') }}" style="color:#FFA07A;font-size:20px;">Register</a>
+          				  <a class="nav-item nav-link" href="{{ url_for('register') }}" style="color:#FFA07A;font-size:20px;"><i class="fa fa-user-plus"></i> Register</a>
                   {% endif %}
         			</div>
       			</div>

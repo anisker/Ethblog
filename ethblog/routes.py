@@ -1,19 +1,28 @@
 import os
 import secrets
+from datetime import datetime
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
-from ethblog import app, db, bcrypt, mail
+from ethblog import app, db, bcrypt, mail, web3, contract
 from ethblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm, RequestResetForm, ResetPasswordForm
-from ethblog.models import User, Post
+from ethblog.models import User
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_mail import Message
-
+import shutil 
+ 
+@app.errorhandler(404)
+def page_not_found(error):
+   return render_template('404.html', title = '404'), 404
 
 @app.route("/home")
 @login_required
 def home():
-	page = request.args.get('page',1, type=int)
-	posts = Post.query.order_by(Post.date_posted.desc()).paginate(page = page, per_page=5)
+	numberOfPosts = contract.functions.getNumberOfPosts().call()
+	i=numberOfPosts-1
+	posts = []
+	while i >= 0:
+		posts.append([i,contract.functions.posts(i).call()])
+		i-=1
 	return render_template('home.html', posts= posts)
 
 
@@ -29,9 +38,11 @@ def register():
 	if form.validate_on_submit():
 		hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
 		user = User(username=form.username.data, email = form.email.data, password= hashed_password)
+		shutil.copy(os.path.join(app.root_path, 'static/profile_pics','default.jpg'),os.path.join(app.root_path, 'static/profile_pics',form.username.data+'.jpg'))
+		user.image_file = form.username.data+'.jpg'
 		db.session.add(user)
 		db.session.commit()
-		flash('Your account has been created ! You can log in now', 'success')
+		flash('Your account has been created ! you are connected', 'success')
 		return redirect(url_for('login'))
 	return render_template('register.html', title = 'Register', form=form)
 
@@ -57,10 +68,9 @@ def logout():
 	logout_user()
 	return redirect(url_for('login'))
 
-def save_picture(form_picture):
-	random_hex = secrets.token_hex(8)
+def save_picture(username, form_picture):
 	_t, f_ext = os.path.splitext(form_picture.filename)
-	picture_fn = random_hex + f_ext
+	picture_fn = username + f_ext
 	picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
 	output_size = (125, 125)
 	i = Image.open(form_picture)
@@ -74,21 +84,21 @@ def save_picture(form_picture):
 def account():
 	form = UpdateAccountForm()
 	if form.validate_on_submit():
-		if form.picture.data:
-			picture_file = save_picture(form.picture.data)
-			current_user.image_file = picture_file
-		current_user.username = form.username.data
-		current_user.email = form.email.data
+		picture_file = save_picture(current_user.username,form.picture.data)
+		current_user.image_file = picture_file
 		db.session.commit()
 		flash('Your account has been updated!', 'success')
 		return redirect(url_for('account'))
-	elif request.method == 'GET':
-		form.username.data = current_user.username
-		form.email.data = current_user.email
 	image_file = url_for('static', filename= 'profile_pics/' + current_user.image_file)
 	page = request.args.get('page',1, type=int)
 	user = User.query.filter_by(username=current_user.username).first_or_404()
-	posts = Post.query.filter_by(author=user).order_by(Post.date_posted.desc()).paginate(page = page, per_page=5)
+	numberOfUserPosts = contract.functions.ownerPostCount(current_user.username).call()
+	i = numberOfUserPosts-1
+	posts = []
+	while i >= 0:
+		temp = contract.functions.usernamesPosts(current_user.username,i).call()
+		posts.append([temp,contract.functions.posts(temp).call()])
+		i-=1
 	return render_template('account.html', title = 'Account', image_file= image_file, form = form, posts= posts, user=user)
 
 @app.route("/post/new", methods=['GET','POST'])
@@ -96,9 +106,8 @@ def account():
 def new_post():
 	form = PostForm()
 	if form.validate_on_submit():
-		post = Post(title = form.title.data, content= form.content.data, author = current_user)
-		db.session.add(post)
-		db.session.commit()
+		tx_hash = contract.functions.createPost(current_user.username,datetime.now().strftime("%m-%d-%Y"),form.title.data,form.content.data).transact()
+		web3.eth.waitForTransactionReceipt(tx_hash)
 		flash('Your post has been created !', 'success')
 		return redirect(url_for('home'))
 	return render_template('create_post.html', title = 'New Post', form = form, legend = 'New post')
@@ -106,45 +115,46 @@ def new_post():
 @app.route("/post/<int:post_id>")
 @login_required
 def post(post_id):
-	post = Post.query.get_or_404(post_id)
-	return render_template('post.html', title= post.title, post = post)
+	try:
+		post = [post_id, contract.functions.getPost(post_id).call()]
+	except ValueError as err:
+		abort(404)
+	return render_template('post.html', title= post[1][2], post = post)
 
 @app.route("/post/<int:post_id>/update", methods=['GET','POST'])
 @login_required
 def update_post(post_id):
-	post = Post.query.get_or_404(post_id)
-	if post.author != current_user:
+	try:
+		post = [post_id, contract.functions.getPost(post_id).call()]
+	except ValueError as err:
+		abort(404)
+	if post[1][0] != current_user.username:
 		abort(403)
 	form = PostForm()
 	if form.validate_on_submit():
-		post.title = form.title.data
-		post.content = form.content.data
-		db.session.commit()
+		tx_hash = contract.functions.setPost(post_id,form.title.data,form.content.data).transact()
+		web3.eth.waitForTransactionReceipt(tx_hash)
 		flash('Your post has been updated !', 'success')
-		return redirect(url_for('post', post_id=post.id))
+		return redirect(url_for('post', post_id=post_id))
 	elif request.method == 'GET':
-		form.title.data = post.title
-		form.content.data = post.content
+		post = contract.functions.getPost(post_id).call()
+		form.title.data = post[2]
+		form.content.data = post[3]
 	return render_template('create_post.html', title= 'Update post', form = form, legend = 'Update post')
-
-@app.route("/post/<int:post_id>/delete", methods=['POST'])
-@login_required
-def delete_post(post_id):
-	post = Post.query.get_or_404(post_id)
-	if post.author != current_user:
-		abort(403)
-	db.session.delete(post)
-	db.session.commit()
-	flash('Your post has been deleted !', 'success')
-	return redirect(url_for('home'))
 
 @app.route("/user/<string:username>")
 @login_required
 def user_posts(username):
 	page = request.args.get('page',1, type=int)
 	user = User.query.filter_by(username=username).first_or_404()
-	posts = Post.query.filter_by(author=user).order_by(Post.date_posted.desc()).paginate(page = page, per_page=5)
-	return render_template('user_posts.html', posts= posts, user=user)
+	numberOfUserPosts = contract.functions.ownerPostCount(username).call()
+	i = numberOfUserPosts-1
+	posts = []
+	while i >= 0:
+		temp = contract.functions.usernamesPosts(username,i).call()
+		posts.append([temp,contract.functions.posts(temp).call()])
+		i=i-1
+	return render_template('user_posts.html', posts= posts, user=user , numberOfUserPosts= numberOfUserPosts)
 
 def send_reset_email(user):
 	token = user.get_reset_token()
