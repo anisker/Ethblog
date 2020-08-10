@@ -24,6 +24,6 @@ $ pip install web3
 ```
 
 # Smart contract compilation and deployment 
-[Ganache](https://www.trufflesuite.com/ganache) is a tool that offers a personal Ethereum blockchain is used for testing smart contractsin a development environment.
+[Ganache](https://www.trufflesuite.com/ganache) is a tool that offers a personal Ethereum blockchain used for testing smart contractsin a development environment.
 
-The smart constract is in the file ETHBlog.sol. Compile and depoly it in the IDE [remix](https://remix.ethereum.org/). In the deployment section. choose "Web3 provider" as environment.
+The smart constract is in the file ETHBlog.sol. Compile and depoly it in the IDE [remix](https://remix.ethereum.org/). Under the deployment section. choose "Web3 provider" as environment.
