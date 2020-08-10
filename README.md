@@ -4,7 +4,7 @@ ETHBlog is a developping social network that allows users to communicate and exc
 
 # Installation 
 
-ETHBlog requires [Python] (https://www.python.org/downloads/) v3.4+ to run. To install the packages, you need to install the package management system [pip] (https://pip.pypa.io/en/stable/installing/)
+ETHBlog requires [Python]:<https://www.python.org/downloads/> v3.4+ to run. To install the packages, you need to install the package management system [pip] (https://pip.pypa.io/en/stable/installing/)
 
 ## Packages
 ETHBlog is a project under development that its configuration is for a development environment. 
