@@ -4,7 +4,7 @@ ETHBlog is a developping social network that allows users to communicate and exc
 
 # Installation 
 
-ETHBlog requires [Python]:<https://www.python.org/downloads/> v3.4+ to run. To install the packages, you need to install the package management system [pip] (https://pip.pypa.io/en/stable/installing/)
+ETHBlog requires [Python](https://www.python.org/downloads/) v3.4+ to run. To install the packages, you need to install the package management system [pip](https://pip.pypa.io/en/stable/installing/)
 
 ## Packages
 ETHBlog is a project under development that its configuration is for a development environment. 
@@ -24,6 +24,6 @@ $ pip install web3
 ```
 
 # Smart contract compilation and deployment 
-[Ganache] (https://www.trufflesuite.com/ganache) is a tool that offers a personal Ethereum blockchain is used for testing smart contractsin a development environment.
+[Ganache](https://www.trufflesuite.com/ganache) is a tool that offers a personal Ethereum blockchain is used for testing smart contractsin a development environment.
 
-The smart constract is in the file ETHBlog.sol. Compile and depoly it in the IDE [remix] (https://remix.ethereum.org/). In the deployment section. choose "Web3 provider" as environment.
+The smart constract is in the file ETHBlog.sol. Compile and depoly it in the IDE [remix](https://remix.ethereum.org/). In the deployment section. choose "Web3 provider" as environment.
