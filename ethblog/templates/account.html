@@ -4,7 +4,7 @@
 		<div class="col-md-7">
 		{% for post in posts %}
 			<article class="media content-section">
-			  <img class="rounded article-img" src="{{ image_file }}">
+			  <img class="rounded-circle article-img" src="{{ image_file }}">
 			  <div class="media-body">
 			    <div class="article-metadata">
 			      <a class="mr-2" href="{{ url_for('account', username=post[1][0]) }}">{{ post[1][0] }}</a>
@@ -18,7 +18,7 @@
 		</div>
 		<div class="content-section col-md-5" style="height: 280px;">
 			  <div class="media">
-			    <img class="rounded account-img" src="{{ image_file }}">
+			    <img class="rounded-circle account-img" src="{{ image_file }}">
 			    <div class="media-body">
 			      <h2 class="account-heading">{{ current_user.username }}</h2>
 			      <p class="text-secondary">{{ current_user.email }}</p>

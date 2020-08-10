@@ -1,5 +1,4 @@
-import os
-import secrets
+import os, shutil, time, secrets
 from datetime import datetime
 from PIL import Image
 from flask import render_template, url_for, flash, redirect, request, abort
@@ -8,7 +7,6 @@ from ethblog.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostFo
 from ethblog.models import User
 from flask_login import login_user, current_user, logout_user, login_required
 from flask_mail import Message
-import shutil 
  
 @app.errorhandler(404)
 def page_not_found(error):
@@ -42,7 +40,7 @@ def register():
 		user.image_file = form.username.data+'.jpg'
 		db.session.add(user)
 		db.session.commit()
-		flash('Your account has been created ! you are connected', 'success')
+		flash('Your account has been created !', 'success')
 		return redirect(url_for('login'))
 	return render_template('register.html', title = 'Register', form=form)
 
