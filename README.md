@@ -1,6 +1,6 @@
 # ETHBlog
 
-ETHBlog is a developping social network that allows users to communicate and exchange contents ensuring the freedom of speech. It uses Ethereum blockain for stocking the contents.
+ETHBlog is a social network under development that allows users to communicate and exchange contents ensuring the freedom of speech. It uses Ethereum blockain for stocking the contents.
 
 # Installation 
 
